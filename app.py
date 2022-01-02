@@ -19,7 +19,7 @@ status_list = ["Applied",
                ]
 
 
-def send_email(email_destination, message_type):    # send emails get the email_destination and message_type
+def send_email(email_destination, message_type, project_name):    # send emails get the
     port = 465
     smtp_server_domain_name = "smtp.gmail.com"
     sender_mail = config.get('main', 'sender_mail')
@@ -28,7 +28,7 @@ def send_email(email_destination, message_type):    # send emails get the email_
     email_destination = email_destination
     if sender_mail.endswith("@datagram.ai"):
         if message_type == "Online Test Sent":
-            message = "Thank you for applying to [Project]."
+            message = "Thank you for applying to ", project_name, "."
         elif message_type == "Reminder Sent":
             message = "You haven’t submitted your test. Everything okay?"
         elif message_type == "Refusal Mail Sent":
@@ -74,26 +74,22 @@ def pipeline_flask():
             elif item[3] == "Applied":
                 wks.update_cell(x, 4, 'Online Test Sent')
                 wks.update_cell(x, 5, datetime_object)
-                send_email(item[1], "Online Test Sent")
-                print(check_7_days_olds(datetime_object))
+                send_email(item[1], "Online Test Sent", item[2])
                 break
             elif item[3] == "Online Test Sent" and not check_7_days_olds(item[4]) and not item[5]:
                 wks.update_cell(x, 4, 'Reminder Sent')
                 wks.update_cell(x, 5, datetime_object)
                 send_email(item[1], "Reminder Sent")
-                print(check_7_days_olds(datetime_object))
                 break
             elif item[3] == "Submitted Test" and eval(item[5]) < 0.5:
                 wks.update_cell(x, 4, 'Refusal Mail Sent')
                 wks.update_cell(x, 5, datetime_object)
                 send_email(item[1], "Refusal Mail Sent")
-                print(check_7_days_olds(datetime_object))
                 break
             elif item[3] == "Submitted Test" and eval(item[5]) > 0.5:
                 wks.update_cell(x, 4, 'Interview Mail Sent')
                 wks.update_cell(x, 5, datetime_object)
                 send_email(item[1], "Interview Mail Sent")
-                print(check_7_days_olds(datetime_object))
         return 'everything is working fine!'
     except Exception:
         return 'something went very wrong the data is probably mess!, it\'s our fault'
@@ -101,4 +97,3 @@ def pipeline_flask():
 
 if __name__ == '__main__':
     app.run()
-
